@@ -3,7 +3,8 @@ services:
     name: pi-app-backend
     env: node
     plan: free
-    buildCommand: cd backend && npm install
+    rootDir: pi-app-template
+    buildCommand: cd backend && npm install --omit=dev
     startCommand: cd backend && node src/server.js
     envVars:
       - key: PORT
@@ -11,7 +12,7 @@ services:
       - key: CORS_ORIGIN
         value: https://yourdomain.example
       - key: SQLITE_PATH
-        value: /var/data/dev.sqlite
+        value: /tmp/dev.sqlite
       - key: WEBHOOK_SECRET
         sync: false
       - key: PI_API_BASE
@@ -24,7 +25,3 @@ services:
         sync: false
       - key: ADMIN_PASS
         sync: false
-    disk:
-      name: data
-      mountPath: /var/data
-      sizeGB: 1
