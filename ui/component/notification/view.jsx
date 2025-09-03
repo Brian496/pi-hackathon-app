@@ -17,14 +17,14 @@ function Notification(props) {
 
       return () => clearTimeout(timer);
     }
-  }, [duration]);
+  }, [duration, handleClose]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       onClose && onClose(id);
     }, 300);
-  };
+  });
 
   const handleAction = (action) => {
     if (action.onClick) {

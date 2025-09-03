@@ -2322,5 +2322,7 @@
   "This will be visible in a few minutes after you submit this form.": "This will be visible in a few minutes after you submit this form.",
   "Anon --[used in <%anonymous% Reposted>]--": "Anon",
   "Your update is now pending. It will take a few minutes to appear for other users.": "Your update is now pending. It will take a few minutes to appear for other users.",
+  "Host up to %percent% of my drive (%limit% GB)": "Host up to %percent% of my drive (%limit% GB)",
+  "Donate space without filling up your drive.": "Donate space without filling up your drive.",
   "--end--": "--end--"
 }

@@ -17,9 +17,9 @@ function Loading(props) {
       case 'dots':
         return (
           <div className={classnames('spinner spinner--dots', className)}>
-            <div className="spinner__dot"></div>
-            <div className="spinner__dot"></div>
-            <div className="spinner__dot"></div>
+            <div className="spinner__dot" />
+            <div className="spinner__dot" />
+            <div className="spinner__dot" />
             {text && <div className="loading__text">{text}</div>}
           </div>
         );

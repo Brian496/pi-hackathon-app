@@ -1,0 +1,27 @@
+# Server
+PORT=5051
+CORS_ORIGIN=*
+
+# Storage (choose one)
+# SQLite (local dev)
+SQLITE_PATH=./dev.sqlite
+# Postgres
+# DATABASE_URL=postgres://user:pass@host:5432/db
+# PGHOST=localhost
+# PGPORT=5432
+# PGUSER=postgres
+# PGPASSWORD=postgres
+# PGDATABASE=piapp
+# PGSSL=false
+
+# Webhooks
+WEBHOOK_SECRET=dev_secret
+
+# Pi API (strict verification)
+PI_API_BASE=https://api.minepi.com
+PI_API_SECRET=REPLACE_WITH_SERVER_SECRET
+PI_STRICT_VERIFY=true
+
+# Admin basic auth
+ADMIN_USER=admin
+ADMIN_PASS=strong-password

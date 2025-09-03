@@ -1,0 +1,12 @@
+{
+  "ticker": "BFC",
+  "name": "BitFuture Coin",
+  "consensus": "pow-double-sha256",
+  "targetBlockTimeSeconds": 120,
+  "initialSubsidy": 50,
+  "maxSupply": 21000000,
+  "halvingYears": 4,
+  "premine": 0,
+  "decimals": 8
+}
+

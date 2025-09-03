@@ -26,7 +26,7 @@ function Tooltip(props) {
     setIsVisible(false);
   };
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
@@ -70,7 +70,7 @@ function Tooltip(props) {
     }
 
     setCoords({ x, y });
-  };
+  });
 
   useEffect(() => {
     if (isVisible) {
@@ -83,7 +83,7 @@ function Tooltip(props) {
         window.removeEventListener('resize', updatePosition);
       };
     }
-  }, [isVisible]);
+  }, [isVisible, updatePosition]);
 
   useEffect(() => {
     return () => {
@@ -116,7 +116,7 @@ function Tooltip(props) {
           }}
         >
           <div className="tooltip__content">{content}</div>
-          <div className="tooltip__arrow"></div>
+          <div className="tooltip__arrow" />
         </div>
       )}
     </div>

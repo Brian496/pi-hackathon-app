@@ -1,0 +1,39 @@
+{
+  "params": {
+    "ticker": "BFC",
+    "name": "BitFuture Coin",
+    "consensus": "pow-double-sha256",
+    "targetBlockTimeSeconds": 120,
+    "initialSubsidy": 50,
+    "maxSupply": 21000000,
+    "halvingYears": 4,
+    "premine": 0,
+    "decimals": 8
+  },
+  "tip": {
+    "header": {
+      "version": 1,
+      "prevHash": "HASH_4",
+      "merkleRoot": "COINBASE_ONLY",
+      "time": 1755405171,
+      "nBits": 486604799,
+      "nonce": 0
+    },
+    "coinbase": 50,
+    "miner": "BFC3XL186umNNWNJW8Yde1NijZYCays",
+    "height": 5,
+    "hash": "HASH_5",
+    "transactions": null
+  },
+  "balances": {
+    "BFC3XL186umNNWNJW8Yde1NijZYCays": 150,
+    "miner": 50
+  },
+  "utxo": {
+    "a376a6e7d87f667a20ad7186794923cd7b511e0637d1d32f07200e3c73a87bf2:0": {
+      "address": "BFC3XL186umNNWNJW8Yde1NijZYCays",
+      "amount": 50
+    }
+  },
+  "mempool": []
+}

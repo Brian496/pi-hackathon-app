@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pi App Template</title>
+    <style>
+      body { font-family: sans-serif; max-width: 720px; margin: 40px auto; }
+      input, button { padding: 8px; margin: 4px 0; }
+      .card { border: 1px solid #ddd; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>Pi App Template</h1>
+    <div class="card">
+      <h3>1) Login (server-verified)</h3>
+      <input id="idToken" placeholder="Paste mock idToken" />
+      <button id="loginBtn">Login</button>
+      <div id="loginResult"></div>
+    </div>
+    <div class="card">
+      <h3>2) Create Payment</h3>
+      <input id="amount" type="number" placeholder="Amount" value="1" />
+      <input id="idem" placeholder="Idempotency Key" />
+      <button id="createPayBtn">Create</button>
+      <div id="createResult"></div>
+    </div>
+    <div class="card">
+      <h3>3) Confirm Payment</h3>
+      <input id="paymentId" placeholder="Payment ID" />
+      <input id="idem2" placeholder="Idempotency Key" />
+      <button id="confirmBtn">Confirm</button>
+      <div id="confirmResult"></div>
+    </div>
+    <div class="card">
+      <h3>4) Protected Content</h3>
+      <button id="myReceiptsBtn">Load My Receipts</button>
+      <pre id="myReceipts" class="mono"></pre>
+      <button id="unlockBtn">Get Protected Content</button>
+      <pre id="unlockResult" class="mono"></pre>
+    </div>
+    <script>
+      function getApiBase() {
+        try {
+          if (window.location.protocol === 'file:') {
+            return 'http://localhost:5051';
+          }
+          const url = new URL(window.location.href);
+          return `${url.protocol}//${url.hostname}:5051`;
+        } catch (e) {
+          return 'http://localhost:5051';
+        }
+      }
+      const API = (path) => (getApiBase() + path);
+      let sessionId = null;
+
+      document.getElementById('loginBtn').onclick = async () => {
+        const idToken = document.getElementById('idToken').value;
+        const out = document.getElementById('loginResult');
+        out.innerText = 'Logging in...';
+        try {
+          const res = await fetch(API('/api/auth/login'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken }) });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          if (!res.ok) { out.innerText = `Error ${res.status}: ${JSON.stringify(data)}`; return; }
+          sessionId = data.sessionId || null;
+          out.innerText = JSON.stringify(data, null, 2);
+        } catch (e) {
+          out.innerText = `Network error: ${e}`;
+        }
+      };
+
+      document.getElementById('createPayBtn').onclick = async () => {
+        const out = document.getElementById('createResult');
+        out.innerText = 'Creating payment...';
+        const amount = parseInt(document.getElementById('amount').value, 10) || 1;
+        const idempotencyKey = document.getElementById('idem').value || Math.random().toString(36).slice(2);
+        try {
+          const res = await fetch(API('/api/payments/create'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, amount, idempotencyKey }) });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          if (!res.ok) { out.innerText = `Error ${res.status}: ${JSON.stringify(data)}`; return; }
+          document.getElementById('createResult').innerText = JSON.stringify(data, null, 2);
+          document.getElementById('paymentId').value = data.payment_id || data.paymentId || '';
+          document.getElementById('idem2').value = idempotencyKey;
+        } catch (e) {
+          out.innerText = `Network error: ${e}`;
+        }
+      };
+
+      document.getElementById('confirmBtn').onclick = async () => {
+        const out = document.getElementById('confirmResult');
+        out.innerText = 'Confirming...';
+        const paymentId = document.getElementById('paymentId').value;
+        const idempotencyKey = document.getElementById('idem2').value;
+        try {
+          const res = await fetch(API('/api/payments/confirm'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId, paymentId, idempotencyKey }) });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          if (!res.ok) { out.innerText = `Error ${res.status}: ${JSON.stringify(data)}`; return; }
+          out.innerText = JSON.stringify(data, null, 2);
+        } catch (e) {
+          out.innerText = `Network error: ${e}`;
+        }
+      };
+
+      document.getElementById('myReceiptsBtn').onclick = async () => {
+        const out = document.getElementById('myReceipts');
+        out.innerText = 'Loading receipts...';
+        try {
+          const res = await fetch(API('/api/me/receipts'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          if (!res.ok) { out.innerText = `Error ${res.status}: ${JSON.stringify(data)}`; return; }
+          out.innerText = JSON.stringify(data, null, 2);
+        } catch (e) {
+          out.innerText = `Network error: ${e}`;
+        }
+      };
+
+      document.getElementById('unlockBtn').onclick = async () => {
+        const out = document.getElementById('unlockResult');
+        out.innerText = 'Checking...';
+        try {
+          const res = await fetch(API('/api/protected'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) });
+          const text = await res.text();
+          let data;
+          try { data = JSON.parse(text); } catch { data = { raw: text }; }
+          if (!res.ok) { out.innerText = `Error ${res.status}: ${JSON.stringify(data)}`; return; }
+          out.innerText = JSON.stringify(data, null, 2);
+        } catch (e) {
+          out.innerText = `Network error: ${e}`;
+        }
+      };
+    </script>
+  </body>
+  </html>
+
+

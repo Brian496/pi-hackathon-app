@@ -1,0 +1,23 @@
+# Core Web3 and Ethereum libraries
+web3==6.15.1
+eth-abi==4.2.1
+eth-utils==2.3.1
+eth-account==0.10.0
+hexbytes==0.3.1
+
+# Async libraries for real-time monitoring
+aiohttp==3.9.1
+asyncio-throttle==1.0.2
+websockets==12.0
+
+# HTTP requests and API interaction
+requests==2.31.0
+
+# Cryptography and security
+cryptography==41.0.8
+
+# JSON and data serialization
+jsonschema==4.20.0
+
+# Logging and monitoring
+colorlog==6.8.0

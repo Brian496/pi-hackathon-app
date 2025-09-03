@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pi App Admin</title>
+    <style>
+      body { font-family: sans-serif; max-width: 1000px; margin: 28px auto; padding: 0 12px; }
+      h1 { margin-bottom: 4px; }
+      .desc { color: #555; margin-bottom: 16px; }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; }
+      .card { flex: 1 1 480px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; }
+      button { padding: 6px 10px; margin: 6px 0; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; }
+      th, td { border: 1px solid #eee; padding: 6px 8px; text-align: left; }
+      th { background: #fafafa; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+  </head>
+  <body>
+    <h1>Admin</h1>
+    <div class="desc">Read-only view of recent sessions and receipts.</div>
+    <div class="row">
+      <div class="card">
+        <h3>Sessions</h3>
+        <div>
+          <input id="sessQ" placeholder="Search id/user" />
+          <label>From <input id="sessStart" type="datetime-local" /></label>
+          <label>To <input id="sessEnd" type="datetime-local" /></label>
+          <input id="sessLimit" type="number" value="50" style="width:80px" />
+          <button id="refreshSessions">Refresh</button>
+          <a id="sessCsv" href="#" download>Export CSV</a>
+        </div>
+        <div id="sessionsStatus" class="mono"></div>
+        <div style="overflow:auto; max-height: 420px;">
+          <table id="sessionsTable">
+            <thead>
+              <tr>
+                <th>session_id</th>
+                <th>user_id</th>
+                <th>created_at</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Receipts</h3>
+        <div>
+          <input id="recQ" placeholder="Search key/payment/user" />
+          <select id="recStatus">
+            <option value="">(any status)</option>
+            <option value="CREATED">CREATED</option>
+            <option value="APPROVED">APPROVED</option>
+            <option value="REJECTED">REJECTED</option>
+          </select>
+          <label>From <input id="recStart" type="datetime-local" /></label>
+          <label>To <input id="recEnd" type="datetime-local" /></label>
+          <input id="recLimit" type="number" value="50" style="width:80px" />
+          <button id="refreshReceipts">Refresh</button>
+          <a id="recCsv" href="#" download>Export CSV</a>
+        </div>
+        <div id="receiptsStatus" class="mono"></div>
+        <div style="overflow:auto; max-height: 420px;">
+          <table id="receiptsTable">
+            <thead>
+              <tr>
+                <th>idempotency_key</th>
+                <th>payment_id</th>
+                <th>amount</th>
+                <th>user_id</th>
+                <th>status</th>
+                <th>created_at</th>
+                <th>updated_at</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchJson(url) {
+        const res = await fetch(url);
+        const text = await res.text();
+        try { return { ok: res.ok, data: JSON.parse(text) }; }
+        catch { return { ok: res.ok, data: { raw: text } }; }
+      }
+
+      function fillTable(tbody, rows, cols) {
+        tbody.innerHTML = '';
+        for (const r of rows) {
+          const tr = document.createElement('tr');
+          for (const c of cols) {
+            const td = document.createElement('td');
+            const v = r[c] !== undefined ? r[c] : '';
+            td.textContent = String(v);
+            if (c.endsWith('_id') || c.endsWith('_key') || c.includes('id')) td.classList.add('mono');
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+      }
+
+      async function loadSessions() {
+        const status = document.getElementById('sessionsStatus');
+        status.textContent = 'Loading...';
+        const q = encodeURIComponent(document.getElementById('sessQ').value || '');
+        const sRaw = document.getElementById('sessStart').value;
+        const eRaw = document.getElementById('sessEnd').value;
+        const start = encodeURIComponent(sRaw ? new Date(sRaw).toISOString() : '');
+        const end = encodeURIComponent(eRaw ? new Date(eRaw).toISOString() : '');
+        const limit = encodeURIComponent(document.getElementById('sessLimit').value || '50');
+        const url = `/admin/sessions?q=${q}&start=${start}&end=${end}&limit=${limit}`;
+        document.getElementById('sessCsv').href = `/admin/sessions.csv?q=${q}&start=${start}&end=${end}&limit=${limit}`;
+        const { ok, data } = await fetchJson(url);
+        status.textContent = ok ? `Loaded ${Array.isArray(data) ? data.length : 0}` : `Error: ${JSON.stringify(data)}`;
+        if (ok && Array.isArray(data)) fillTable(document.querySelector('#sessionsTable tbody'), data, ['session_id','user_id','created_at']);
+      }
+
+      async function loadReceipts() {
+        const status = document.getElementById('receiptsStatus');
+        status.textContent = 'Loading...';
+        const q = encodeURIComponent(document.getElementById('recQ').value || '');
+        const s = encodeURIComponent(document.getElementById('recStatus').value || '');
+        const sRaw = document.getElementById('recStart').value;
+        const eRaw = document.getElementById('recEnd').value;
+        const start = encodeURIComponent(sRaw ? new Date(sRaw).toISOString() : '');
+        const end = encodeURIComponent(eRaw ? new Date(eRaw).toISOString() : '');
+        const limit = encodeURIComponent(document.getElementById('recLimit').value || '50');
+        const url = `/admin/receipts?q=${q}&status=${s}&start=${start}&end=${end}&limit=${limit}`;
+        document.getElementById('recCsv').href = `/admin/receipts.csv?q=${q}&status=${s}&start=${start}&end=${end}&limit=${limit}`;
+        const { ok, data } = await fetchJson(url);
+        status.textContent = ok ? `Loaded ${Array.isArray(data) ? data.length : 0}` : `Error: ${JSON.stringify(data)}`;
+        if (ok && Array.isArray(data)) fillTable(document.querySelector('#receiptsTable tbody'), data, ['idempotency_key','payment_id','amount','user_id','status','created_at','updated_at']);
+      }
+
+      document.getElementById('refreshSessions').onclick = loadSessions;
+      document.getElementById('refreshReceipts').onclick = loadReceipts;
+      loadSessions();
+      loadReceipts();
+    </script>
+  </body>
+  </html>
+
+
