@@ -7,8 +7,6 @@ services:
     buildCommand: cd backend && npm install --omit=dev
     startCommand: cd backend && node src/server.js
     envVars:
-      - key: PORT
-        value: 10000
       - key: CORS_ORIGIN
         value: https://yourdomain.example
       - key: SQLITE_PATH
